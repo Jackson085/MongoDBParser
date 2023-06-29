@@ -32,6 +32,13 @@ class DatabaseConnector:
     def insert(self, _in: object):
         self.db_table.insert_one(p.__dict__)
 
+    # region find
+    def _find(self):
+        rows = []
+        for _row in self.db_table.find():
+            rows.append(_row)
+        return rows
+
     @overload
     def find(self) -> dict:
         pass
@@ -41,16 +48,32 @@ class DatabaseConnector:
         pass
 
     def find(self, top_level_class: object = None, *sub_level_class: object):
-        result = self.find_one()
+        result = self._find()
         self.logger.info(f'get result from database {result}')
         if top_level_class is None:
             return result
-        return self.parse_result_to_object(result, top_level_class, sub_level_class)
+        return self._parse_result_to_object(result, top_level_class, sub_level_class)
 
-    def find_one(self):
+    def _find_one(self):
         return self.db_table.find_one()
 
-    def parse_result_to_object(self, result, top_level_class, *sub_level_class) -> object:
+    @overload
+    def find_one(self) -> dict:
+        pass
+
+    @overload
+    def find_one(self, top_level_class, *classes_to_parse: object) -> object:
+        pass
+
+    def find_one(self, top_level_class: object = None, *sub_level_class: object):
+        result = self._find_one()
+        self.logger.info(f'get result from database {result}')
+        if top_level_class is None:
+            return result
+        return self._parse_result_to_object(result, top_level_class, sub_level_class)
+    # endregion
+
+    def _parse_result_to_object(self, result, top_level_class, *sub_level_class) -> object:
         if not result:
             return None
 
@@ -59,7 +82,7 @@ class DatabaseConnector:
             if isinstance(value, dict):
                 sub_obj_class = get_class_by_name(key, top_level_class, sub_level_class)
                 if sub_obj_class:
-                    sub_obj = self.parse_result_to_object(value, sub_obj_class)
+                    sub_obj = self._parse_result_to_object(value, sub_obj_class)
                     setattr(obj, key, sub_obj)
             else:
                 setattr(obj, key, value)
