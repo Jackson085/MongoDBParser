@@ -29,8 +29,19 @@ class DatabaseConnector:
         self.db_table = self.mydb['TestTable']
         self.classes = classes
 
-    def insert(self, _in: object):
-        self.db_table.insert_one(p.__dict__)
+    def _insert_one(self, obj: object):
+        obj = self._parse_object_to_dict(obj)
+        self.db_table.insert_one(obj)
+
+    def insert_one(self, obj: object):
+        self._insert_one(obj)
+
+    def _insert_many(self, obj: object):
+        NotImplementedError()
+
+    def insert_many(self, obj: object):
+        self._insert_many(obj)
+    # endregion
 
     # region find
     def _find(self) -> list:
@@ -74,6 +85,7 @@ class DatabaseConnector:
         return self._parse_result_to_object(result, top_level_class, sub_level_class)
     # endregion
 
+    # region parser
     def _parse_result_to_object(self, result, top_level_class, *sub_level_class) -> object:
         if not result:
             return None
@@ -99,6 +111,7 @@ class DatabaseConnector:
             return self._parse_object_to_dict(obj.__dict__())
         else:
             return obj
+    # endregion
 
 
 class Person:
