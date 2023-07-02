@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 from src.DatabaseConnector.MongoClient import MongoClient
 from typing import TypeVar
 
@@ -14,8 +15,8 @@ def get_class_by_name(class_name, *classes_to_parse):
 
 
 class MongoClientParser(MongoClient):
-    def __init__(self, database_name: str, collection_name: str):
-        MongoClient.__init__(self, database_name, collection_name)
+    def __init__(self, database_name: str, collection_name: str, log_level: int = logging.DEBUG):
+        MongoClient.__init__(self, database_name, collection_name, log_level)
 
     # region insert
     def parse_insert_one(self, obj: object) -> None:

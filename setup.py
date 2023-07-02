@@ -8,12 +8,12 @@ setuptools.setup(
     version = "0.0.1",
     author = "Jackson085",
     author_email = " ",
-    description = " ",
+    description = "Simple Parser for MongoDB",
     long_description = long_description,
     long_description_content_type = "text/markdown",
     url = "package URL",
     project_urls = {
-        "Bug Tracker": "package issues URL",
+        "Bug Tracker": "https://github.com/Jackson085/DatabaseConnector/issues",
     },
     classifiers = [
         "Programming Language :: Python :: 3",
