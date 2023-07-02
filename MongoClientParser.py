@@ -26,34 +26,32 @@ class MongoClientParser(MongoClient):
     # endregion
 
     # region find
-    def parse_find(self, top_level_class: T, filter: dict = None, *sub_level_class: object) -> list[T]:
+    def parse_find(self, top_level_class: T, filter: dict = None) -> list[T]:
         result = self.find(filter)
         self.logger.debug(f'got result from database {result} and start parsing')
-        return [self._parse_result_to_object(x, top_level_class, sub_level_class) for x in result]
+        return [self._parse_result_to_object(x, top_level_class) for x in result]
 
-    def parse_find_one(self, top_level_class: T, filter: dict = None, *sub_level_class: object) -> T:
+    def parse_find_one(self, top_level_class: T, filter: dict = None) -> T:
         result = self.find_one(filter)
         self.logger.debug(f'got result from database {result} and start parsing')
-        # return top_level_class()
-        return self._parse_result_to_object(result, top_level_class, sub_level_class)
+        return self._parse_result_to_object(result, top_level_class)
     # endregion
 
     # region parser
-    def _parse_result_to_object(self, result, top_level_class: T, *sub_level_class) -> T:
+    def _parse_result_to_object(self, result, top_level_class: T) -> T:
         if not result:
             return None
 
-        obj = top_level_class
         for key, value in result.items():
             if isinstance(value, dict):
-                sub_obj_class = get_class_by_name(key, top_level_class, *sub_level_class)
+                sub_obj_class = get_class_by_name(key, top_level_class)
                 if sub_obj_class:
-                    sub_obj = self._parse_result_to_object(value, sub_obj_class, *sub_level_class)
-                    setattr(obj, key, sub_obj)
+                    sub_obj = self._parse_result_to_object(value, sub_obj_class)
+                    setattr(top_level_class, key, sub_obj)
             else:
-                setattr(obj, key, value)
+                setattr(top_level_class, key, value)
 
-        return obj
+        return top_level_class
 
     def _parse_object_to_dict(self, obj) -> list | dict:
         if isinstance(obj, (list, tuple)):
