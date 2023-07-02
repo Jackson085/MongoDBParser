@@ -1,11 +1,12 @@
+import logging
 from DatabaseConnector import DatabaseConnector
 from Logger import Logger
 
 
 class MongoClient(DatabaseConnector, Logger):
-    def __init__(self, database_name: str, collection_name: str):
+    def __init__(self, database_name: str, collection_name: str, log_level: int = logging.DEBUG):
         DatabaseConnector.__init__(self, database_name, collection_name)
-        Logger.__init__(self)
+        Logger.__init__(self, log_level)
 
     # region insert
     def insert_one(self, obj: dict) -> None:
