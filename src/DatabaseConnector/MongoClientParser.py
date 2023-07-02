@@ -1,5 +1,5 @@
 from __future__ import annotations
-from MongoClient import MongoClient
+from src.DatabaseConnector.MongoClient import MongoClient
 from typing import TypeVar
 
 
