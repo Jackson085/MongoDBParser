@@ -38,6 +38,15 @@ class MongoClientParser(MongoClient):
         return self._parse_result_to_object(result, top_level_class)
     # endregion
 
+    # region find
+    def parse_update(self, filter: dict, class_as_obj: T) -> None:
+        self.logger.debug(f'update {class_as_obj} from database with filter {filter}')
+        self.update_one(filter, {"$set": self._parse_object_to_dict(class_as_obj)})
+
+    def parse_update_one(self, filter: dict, *top_level_class: T) -> None:
+        [self.parse_update(filter, x) for x in top_level_class]
+    # endregion
+
     # region parser
     def _parse_result_to_object(self, result, top_level_class: T) -> T:
         if not result:
