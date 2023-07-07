@@ -29,3 +29,15 @@ class MongoClient(DatabaseConnector, Logger):
         self.logger.debug(f"start searching in {self.collection} with filter: {filter}")
         return self.collection.find_one(filter)
     # endregion
+
+    # region find
+    def update(self, filter: dict, update: dict) -> None:
+        filter = {} if filter is None else filter
+        self.logger.debug(f"start updating many in {self.collection} with filter: {filter}, update: {update}")
+        self.collection.update_many(filter, update)
+
+    def update_one(self, filter: dict, update: dict) -> None:
+        filter = {} if filter is None else filter
+        self.logger.debug(f"start updating in {self.collection} with filter: {filter}, update: {update}")
+        self.collection.update_one(filter, update)
+    # endregion
