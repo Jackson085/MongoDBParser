@@ -11,6 +11,10 @@ def get_class_by_name(class_name, *classes_to_parse):
     for obj_class in classes_to_parse:
         if isinstance(obj_class, type) and obj_class.__name__.lower() == class_name.lower():
             return obj_class
+def get_class_instance_by_name(key: str, *classes_to_parse: dict):
+    for _class in classes_to_parse:
+        if key in _class.keys():
+            return _class[key]()
     return None
 
 
