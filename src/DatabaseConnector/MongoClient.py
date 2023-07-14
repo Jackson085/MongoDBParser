@@ -1,6 +1,6 @@
 import logging
-from src.DatabaseConnector.DatabaseConnector import DatabaseConnector
-from src.DatabaseConnector.Logger import Logger
+from DatabaseConnector.DatabaseConnector import DatabaseConnector
+from DatabaseConnector.Logger import Logger
 
 
 class MongoClient(DatabaseConnector, Logger):
