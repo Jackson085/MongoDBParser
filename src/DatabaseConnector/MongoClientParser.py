@@ -38,8 +38,12 @@ class MongoClientParser(MongoClient):
 
     def parse_find_one(self, top_level_class: T, filter: dict = None) -> T:
         result = self.find_one(filter)
+    def parse_find_one(self, top_level_class: T, filter: dict = None, *sub_classes: dict) -> T:
+        # result = self.find_one(filter)
+        result = {'_id': ObjectId('64a5abb7493953bbdceb74b3'), 'age': 42, 'name': 'name', 'pet': {'name': 'TestName', 'type': 'DogTest'}}
         self.logger.debug(f'got result from database {result} and start parsing')
         return self._parse_result_to_object(result, top_level_class)
+        return self._parse_result_to_object(result, top_level_class, *sub_classes)
     # endregion
 
     # region find
@@ -53,12 +57,14 @@ class MongoClientParser(MongoClient):
 
     # region parser
     def _parse_result_to_object(self, result, top_level_class: T) -> T:
+    def _parse_result_to_object(self, result, top_level_class: T, *sub_classes: dict) -> T:
         if not result:
             return None
 
         for key, value in result.items():
             if isinstance(value, dict):
                 sub_obj_class = get_class_by_name(key, top_level_class)
+                sub_obj_class = get_class_instance_by_name(key, *sub_classes)
                 if sub_obj_class:
                     sub_obj = self._parse_result_to_object(value, sub_obj_class)
                     setattr(top_level_class, key, sub_obj)
