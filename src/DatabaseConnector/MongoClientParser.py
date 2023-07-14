@@ -32,15 +32,18 @@ class MongoClientParser(MongoClient):
 
     # region find
     def parse_find(self, top_level_class: T, filter: dict = None) -> list[T]:
+    def parse_find(self, top_level_class: T, filter: dict = None, *sub_classes: dict) -> list[T]:
         result = self.find(filter)
         self.logger.debug(f'got result from database {result} and start parsing')
         return [self._parse_result_to_object(x, top_level_class) for x in result]
+        return [self._parse_result_to_object(x, top_level_class, *sub_classes) for x in result]
 
     def parse_find_one(self, top_level_class: T, filter: dict = None) -> T:
         result = self.find_one(filter)
     def parse_find_one(self, top_level_class: T, filter: dict = None, *sub_classes: dict) -> T:
         # result = self.find_one(filter)
         result = {'_id': ObjectId('64a5abb7493953bbdceb74b3'), 'age': 42, 'name': 'name', 'pet': {'name': 'TestName', 'type': 'DogTest'}}
+        result = self.find_one(filter)
         self.logger.debug(f'got result from database {result} and start parsing')
         return self._parse_result_to_object(result, top_level_class)
         return self._parse_result_to_object(result, top_level_class, *sub_classes)
