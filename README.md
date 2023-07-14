@@ -23,7 +23,9 @@ This packet can parse results from MongoDb to their original class
     client = MongoClientParser('database_name', 'collection_name')
     client.parse_insert_one(h)      # convert attributes from __dict__ to dict and saves them in the database
     
-    obj = client.parse_find_one(Human(), {'name': 'name'})      # obj is instance from Human and not a dict
+
+    obj = client.parse_find_one(Human(), {'name': 'name'}, {'pet': Pet})      # obj is instance from Human and not a dict
+    # {'pet': Pet} if key == 'pet' value is parsed to Pet
 
 
 Install with pip
