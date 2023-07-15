@@ -11,6 +11,7 @@ def get_class_instance_by_name(key: str, *classes_to_parse: dict):
     for _class in classes_to_parse:
         if key in _class.keys():
             return _class[key]()
+            return _class[key].__new__(_class[key])
     return None
 
 
@@ -57,6 +58,7 @@ class MongoClientParser(MongoClient):
                 sub_obj_class = get_class_instance_by_name(key, *sub_classes)
                 if sub_obj_class:
                     sub_obj = self._parse_result_to_object(value, sub_obj_class)
+                    sub_obj = self._parse_result_to_object(value, sub_obj_class, *sub_classes)
                     setattr(top_level_class, key, sub_obj)
             else:
                 setattr(top_level_class, key, value)
