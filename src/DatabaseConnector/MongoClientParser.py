@@ -1,10 +1,11 @@
 from __future__ import annotations
 import logging
-from DatabaseConnector.MongoClient import MongoClient
+from MongoClient import MongoClient
 from typing import TypeVar
 
 
 T = TypeVar('T')
+logger = logging.getLogger(__name__)
 
 
 def get_class_instance_by_name(key: str, *classes_to_parse: dict):
@@ -15,8 +16,8 @@ def get_class_instance_by_name(key: str, *classes_to_parse: dict):
 
 
 class MongoClientParser(MongoClient):
-    def __init__(self, database_name: str, collection_name: str, log_level: int = logging.DEBUG):
-        MongoClient.__init__(self, database_name, collection_name, log_level)
+    def __init__(self, database_name: str, collection_name: str):
+        MongoClient.__init__(self, database_name, collection_name)
 
     # region insert
     def parse_insert_one(self, obj: object) -> None:
@@ -29,18 +30,18 @@ class MongoClientParser(MongoClient):
     # region find
     def parse_find(self, top_level_class: T, filter: dict = None, *sub_classes: dict) -> list[T]:
         result = self.find(filter)
-        self.logger.debug(f'got result from database {result} and start parsing')
+        logger.debug(f'got result from database {result} and start parsing')
         return [self._parse_result_to_object(x, top_level_class, *sub_classes) for x in result]
 
     def parse_find_one(self, top_level_class: T, filter: dict = None, *sub_classes: dict) -> T:
         result = self.find_one(filter)
-        self.logger.debug(f'got result from database {result} and start parsing')
+        logger.debug(f'got result from database {result} and start parsing')
         return self._parse_result_to_object(result, top_level_class, *sub_classes)
     # endregion
 
     # region find
     def parse_update(self, filter: dict, class_as_obj: T) -> None:
-        self.logger.debug(f'update {class_as_obj} from database with filter {filter}')
+        logger.debug(f'update {class_as_obj} from database with filter {filter}')
         self.update_one(filter, {"$set": self._parse_object_to_dict(class_as_obj)})
 
     def parse_update_one(self, filter: dict, *top_level_class: T) -> None:
@@ -52,14 +53,6 @@ class MongoClientParser(MongoClient):
         if not result:
             return None
 
-        for key, value in result.items():
-            if isinstance(value, dict):
-                sub_obj_class = get_class_instance_by_name(key, *sub_classes)
-                if sub_obj_class:
-                    sub_obj = self._parse_result_to_object(value, sub_obj_class, *sub_classes)
-                    setattr(top_level_class, key, sub_obj)
-            else:
-                setattr(top_level_class, key, value)
         if isinstance(result, list):
             self._parse_list_to_object(result, *sub_classes)
             return result
@@ -104,32 +97,4 @@ class MongoClientParser(MongoClient):
 
 
 if __name__ == '__main__':
-
-    class Test:
-        def __init__(self):
-            self.type = None
-            self.name = None
-
-        def __dict__(self):
-            return {'type': self.type, 'name': self.name}
-
-
-    class Human:
-        def __init__(self):
-            self.age = 42
-            self.name = "name"
-            self.pet = Test()
-            self.private_attribute = "foo"
-
-        def __dict__(self):
-            return {'age': self.age, 'name': self.name, 'pet': self.pet}
-
-    h = Human()
-    client = MongoClientParser('database_name', 'collection_name')
-    # client.parse_insert_one(h)  # convert attributes from __dict__ to dict and saves them in the database
-
-    obj = client.parse_find_one(Human(), {'name': 'name'}, {'pet': Test})  # obj is instance from Human and not a dict
-    print(obj.pet.name)
-    o = 0
-
-    # get_class_instance_by_name('pet', {'pet': Test}, {'human': Human})
+    pass
