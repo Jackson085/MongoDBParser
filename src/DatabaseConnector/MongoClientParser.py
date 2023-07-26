@@ -60,8 +60,36 @@ class MongoClientParser(MongoClient):
                     setattr(top_level_class, key, sub_obj)
             else:
                 setattr(top_level_class, key, value)
+        if isinstance(result, list):
+            self._parse_list_to_object(result, *sub_classes)
+            return result
+
+        elif isinstance(result, dict):
+            for key, value in result.items():
+                if isinstance(value, dict):
+                    sub_obj_class = get_class_instance_by_name(key, *sub_classes)
+                    if sub_obj_class:
+                        sub_obj = self._parse_result_to_object(value, sub_obj_class, *sub_classes)
+                        setattr(top_level_class, key, sub_obj)
+
+                if isinstance(value, list):
+                    new_list = self._parse_result_to_object(value, top_level_class, *sub_classes)
+                    setattr(top_level_class, key, new_list)
+
+                else:
+                    setattr(top_level_class, key, value)
 
         return top_level_class
+
+    def _parse_list_to_object(self, list_in: list, *sub_classes):
+        for index, item in enumerate(list_in):
+            if isinstance(item, list):
+                self._parse_list_to_object(item, *sub_classes)
+
+            elif isinstance(item, dict):
+                sub_obj_class = get_class_instance_by_name(next(iter(item)), *sub_classes)
+                if sub_obj_class:
+                    list_in[index] = self._parse_result_to_object(item, sub_obj_class, *sub_classes)
 
     def _parse_object_to_dict(self, obj) -> list | dict:
         if isinstance(obj, (list, tuple)):
