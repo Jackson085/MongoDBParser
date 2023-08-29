@@ -1,5 +1,7 @@
 This packet can parse results from MongoDb to their original class
 
+↓ don't trust this documentation. I will update this (soon) ↓
+
     class Pet:
         def __init__(self):
             self.type = "dog"
