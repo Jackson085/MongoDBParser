@@ -70,7 +70,8 @@ class MongoClientParser(MongoClient):
                     setattr(top_level_class, key, new_list)
 
                 else:
-                    setattr(top_level_class, key, value)
+                    if not isinstance(value, dict):
+                        setattr(top_level_class, key, value)
 
         return top_level_class
 
