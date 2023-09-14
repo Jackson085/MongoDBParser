@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 import logging
-from MongoClient import MongoClient
+from DatabaseConnector.MongoClient import MongoClient
 from typing import TypeVar
 
 
@@ -87,7 +88,7 @@ class MongoClientParser(MongoClient):
 
     def _parse_object_to_dict(self, obj) -> list | dict:
         if isinstance(obj, (list, tuple)):
-            return [self._parse_object_to_dict(item) for item in obj]
+            return [{obj[0].__class__.__name__: self._parse_object_to_dict(item)} for item in obj]
         elif isinstance(obj, dict):
             return {key: self._parse_object_to_dict(value) for key, value in obj.items()}
         elif hasattr(obj, "__dict__"):

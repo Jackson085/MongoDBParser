@@ -2,7 +2,7 @@ import unittest
 from DatabaseConnector.MongoClient import MongoClient
 
 
-class MyTestCase(unittest.TestCase):
+class MongoClientTest(unittest.TestCase):
     def test_client_instances(self):
         ins1 = MongoClient('DatabaseTest', 'CollectionTest1').collection
         ins2 = MongoClient('DatabaseTest', 'CollectionTest2').collection
