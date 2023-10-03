@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from DatabaseConnector.MongoClient import MongoClient
+from src.DatabaseConnector.MongoClient import MongoClient
 from typing import TypeVar
 
 
@@ -22,20 +22,23 @@ class MongoClientParser(MongoClient):
 
     # region insert
     def parse_insert_one(self, obj: object) -> None:
-        self.insert_one(self._parse_object_to_dict(obj))
+        json = self._parse_object_to_dict(obj)
+        logger.debug(json)
+        self.collection.insert_one(json)
 
-    def insert_many(self, obj: object) -> None:
-        self.insert_many(self._parse_object_to_dict(obj))
+    # def insert_many(self, obj: object) -> None:
+    #     self.collection.insert_many()
+    #     self.insert_many(self._parse_object_to_dict(obj))
     # endregion
 
     # region find
     def parse_find(self, top_level_class: T, filter: dict = None, *sub_classes: dict) -> list[T]:
-        result = self.find(filter)
+        result = self.collection.find(filter)
         logger.debug(f'got result from database {result} and start parsing')
         return [self._parse_result_to_object(x, top_level_class, *sub_classes) for x in result]
 
     def parse_find_one(self, top_level_class: T, filter: dict = None, *sub_classes: dict) -> T:
-        result = self.find_one(filter)
+        result = self.collection.find_one(filter)
         logger.debug(f'got result from database {result} and start parsing')
         return self._parse_result_to_object(result, top_level_class, *sub_classes)
     # endregion
@@ -43,7 +46,7 @@ class MongoClientParser(MongoClient):
     # region find
     def parse_update(self, filter: dict, class_as_obj: T) -> None:
         logger.debug(f'update {class_as_obj} from database with filter {filter}')
-        self.update_one(filter, {"$set": self._parse_object_to_dict(class_as_obj)})
+        self.collection.update_one(filter, {"$set": self._parse_object_to_dict(class_as_obj)})
 
     def parse_update_one(self, filter: dict, *top_level_class: T) -> None:
         [self.parse_update(filter, x) for x in top_level_class]
@@ -88,13 +91,38 @@ class MongoClientParser(MongoClient):
 
     def _parse_object_to_dict(self, obj) -> list | dict:
         if isinstance(obj, (list, tuple)):
-            return [{obj[0].__class__.__name__: self._parse_object_to_dict(item)} for item in obj]
+            return self._parse_list_to_dict(obj)
+            # return {obj[0].__class__.__name__: self._parse_list_to_dict(obj)}
+            # temp_list = []
+            # for element in obj:
+            #     return self._parse_object_to_dict(element)
+            #     if isinstance(element, list) or isinstance(element, tuple) or isinstance(element, dict):
+            #         return self._parse_object_to_dict(element)
+            #     elif hasattr(element, '__dict__'):
+            #         temp_list.append({element.__class__.__name__: self._parse_object_to_dict(element)})
+            #     else:
+            #         temp_list.append(element)
+            # return temp_list
+
         elif isinstance(obj, dict):
             return {key: self._parse_object_to_dict(value) for key, value in obj.items()}
         elif hasattr(obj, "__dict__"):
             return self._parse_object_to_dict(obj.__dict__())
         else:
             return obj
+
+    def _parse_list_to_dict(self, list_in: list):
+        list_out = []
+        for element in list_in:
+            if isinstance(element, list):
+                list_out.append({element[0].__class__.__name__: self._parse_list_to_dict(element)})
+                # list_out.append(self._parse_list_to_dict(element))
+            else:
+                if hasattr(element, "__dict__"):
+                    list_out.append({element.__class__.__name__: self._parse_object_to_dict(element)})
+                else:
+                    list_out.append(element)
+        return list_out
     # endregion
 
 

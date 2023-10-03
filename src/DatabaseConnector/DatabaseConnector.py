@@ -17,3 +17,8 @@ class DatabaseConnector:
         self.db_client = pymongo.MongoClient()
         self.mydb = self.db_client[database_name]
         self.collection = self.mydb[collection_name]
+
+
+if __name__ == '__main__':
+    d = DatabaseConnector('test', 'test')
+    d.collection.insert_one({'15': ((15, 15))})

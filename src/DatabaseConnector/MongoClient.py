@@ -1,5 +1,5 @@
 import logging
-from DatabaseConnector import DatabaseConnector
+from src.DatabaseConnector.DatabaseConnector import DatabaseConnector
 
 
 logger = logging.getLogger(__name__)
