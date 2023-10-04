@@ -92,19 +92,7 @@ class MongoClientParser(MongoClient):
     def _parse_object_to_dict(self, obj) -> list | dict:
         if isinstance(obj, (list, tuple)):
             return self._parse_list_to_dict(obj)
-            # return {obj[0].__class__.__name__: self._parse_list_to_dict(obj)}
-            # temp_list = []
-            # for element in obj:
-            #     return self._parse_object_to_dict(element)
-            #     if isinstance(element, list) or isinstance(element, tuple) or isinstance(element, dict):
-            #         return self._parse_object_to_dict(element)
-            #     elif hasattr(element, '__dict__'):
-            #         temp_list.append({element.__class__.__name__: self._parse_object_to_dict(element)})
-            #     else:
-            #         temp_list.append(element)
-            # return temp_list
-
-        elif isinstance(obj, dict):
+        if isinstance(obj, dict):
             return {key: self._parse_object_to_dict(value) for key, value in obj.items()}
         elif hasattr(obj, "__dict__"):
             return self._parse_object_to_dict(obj.__dict__())
@@ -115,8 +103,10 @@ class MongoClientParser(MongoClient):
         list_out = []
         for element in list_in:
             if isinstance(element, list):
-                list_out.append({element[0].__class__.__name__: self._parse_list_to_dict(element)})
-                # list_out.append(self._parse_list_to_dict(element))
+                if hasattr(element[0], "__dict__"):
+                    list_out.append({element[0].__class__.__name__: self._parse_list_to_dict(element)})
+                else:
+                    list_out.append(element)
             else:
                 if hasattr(element, "__dict__"):
                     list_out.append({element.__class__.__name__: self._parse_object_to_dict(element)})
