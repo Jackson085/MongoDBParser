@@ -103,10 +103,12 @@ class MongoClientParser(MongoClient):
         list_out = []
         for element in list_in:
             if isinstance(element, list):
-                if hasattr(element[0], "__dict__"):
-                    list_out.append({element[0].__class__.__name__: self._parse_list_to_dict(element)})
-                else:
-                    list_out.append(element)
+                list_out.append(self._parse_list_to_dict(element))
+                # return [self._parse_list_to_dict(element)]
+                # if hasattr(element[0], "__dict__"):
+                #     list_out.append({element[0].__class__.__name__: self._parse_list_to_dict(element)})
+                # else:
+                #     list_out.append(element)
             else:
                 if hasattr(element, "__dict__"):
                     list_out.append({element.__class__.__name__: self._parse_object_to_dict(element)})
