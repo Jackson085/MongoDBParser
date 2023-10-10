@@ -87,7 +87,6 @@ class MongoClientParser(MongoClient):
             elif isinstance(item, dict):
                 sub_obj_class = get_class_instance_by_name(next(iter(item)), *sub_classes)
                 if sub_obj_class:
-                    # list_in[index] = self._parse_dict_to_object(item, sub_obj_class, *sub_classes)
                     list_in[index] = self._parse_dict_to_object(item[next(iter(item.keys()))], sub_obj_class, *sub_classes)
 
     def _parse_object_to_dict(self, obj) -> list | dict:
