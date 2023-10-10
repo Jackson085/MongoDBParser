@@ -35,12 +35,12 @@ class MongoClientParser(MongoClient):
     def parse_find(self, top_level_class: T, filter: dict = None, *sub_classes: dict) -> list[T]:
         result = self.collection.find(filter)
         logger.debug(f'got result from database {result} and start parsing')
-        return [self._parse_result_to_object(x, top_level_class, *sub_classes) for x in result]
+        return [self._parse_dict_to_object(x, top_level_class, *sub_classes) for x in result]
 
     def parse_find_one(self, top_level_class: T, filter: dict = None, *sub_classes: dict) -> T:
         result = self.collection.find_one(filter)
         logger.debug(f'got result from database {result} and start parsing')
-        return self._parse_result_to_object(result, top_level_class, *sub_classes)
+        return self._parse_dict_to_object(result, top_level_class, *sub_classes)
     # endregion
 
     # region find
@@ -53,24 +53,24 @@ class MongoClientParser(MongoClient):
     # endregion
 
     # region parser
-    def _parse_result_to_object(self, result, top_level_class: T, *sub_classes: dict) -> T:
-        if not result:
+    def _parse_dict_to_object(self, dict_in, top_level_class: T, *sub_classes: dict) -> T:
+        if not dict_in:
             return None
 
-        if isinstance(result, list):
-            self._parse_list_to_object(result, *sub_classes)
-            return result
+        if isinstance(dict_in, list):
+            self._parse_list_to_object(dict_in, *sub_classes)
+            return dict_in
 
-        elif isinstance(result, dict):
-            for key, value in result.items():
+        elif isinstance(dict_in, dict):
+            for key, value in dict_in.items():
                 if isinstance(value, dict):
                     sub_obj_class = get_class_instance_by_name(key, *sub_classes)
                     if sub_obj_class:
-                        sub_obj = self._parse_result_to_object(value, sub_obj_class, *sub_classes)
+                        sub_obj = self._parse_dict_to_object(value, sub_obj_class, *sub_classes)
                         setattr(top_level_class, key, sub_obj)
 
                 if isinstance(value, list):
-                    new_list = self._parse_result_to_object(value, top_level_class, *sub_classes)
+                    new_list = self._parse_dict_to_object(value, top_level_class, *sub_classes)
                     setattr(top_level_class, key, new_list)
 
                 else:
@@ -87,7 +87,8 @@ class MongoClientParser(MongoClient):
             elif isinstance(item, dict):
                 sub_obj_class = get_class_instance_by_name(next(iter(item)), *sub_classes)
                 if sub_obj_class:
-                    list_in[index] = self._parse_result_to_object(item, sub_obj_class, *sub_classes)
+                    # list_in[index] = self._parse_dict_to_object(item, sub_obj_class, *sub_classes)
+                    list_in[index] = self._parse_dict_to_object(item[next(iter(item.keys()))], sub_obj_class, *sub_classes)
 
     def _parse_object_to_dict(self, obj) -> list | dict:
         if isinstance(obj, (list, tuple)):
