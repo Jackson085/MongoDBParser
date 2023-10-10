@@ -1,6 +1,5 @@
 import unittest
 from src.DatabaseConnector.MongoClientParser import MongoClientParser
-# from TestClasses.SimpleClass import SimpleClass, ClassWithSubclass, ClassWithTwoSubclasses, ClassWithList
 from TestClasses.SimpleClass import *
 
 
