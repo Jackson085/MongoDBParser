@@ -1,5 +1,5 @@
 import unittest
-from DatabaseConnector.MongoClient import MongoClient
+from src.DatabaseConnector.MongoClient import MongoClient
 
 
 class MongoClientTest(unittest.TestCase):
