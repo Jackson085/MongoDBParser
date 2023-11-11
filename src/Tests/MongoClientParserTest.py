@@ -111,6 +111,7 @@ class MongoClientParserTest(unittest.TestCase):
 
         loaded_class = self.ins._parse_dict_to_object(json, ClassWithObjectsIn2DList, {'SimpleClass': SimpleClass})
 
+        # self.assertIsInstance(loaded_class, ClassWithObjectsIn2DList)
         self.assertEqual(1, loaded_class.parent_var)
 
         self.assertIsInstance(loaded_class.my_list, list)
